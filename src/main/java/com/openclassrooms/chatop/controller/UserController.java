@@ -17,7 +17,20 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @PostMapping("register")
+    public ResponseEntity<AuthSuccess> register(@RequestBody RegisterRequest user){
+        return ResponseEntity.ok(userService.register(user));
+    }
+    @PostMapping("login")
+    public ResponseEntity<AuthSuccess> login(@RequestBody LoginRequest user){
+        return ResponseEntity.ok(userService.authenticate(user));
+    }
+
+
+
+
+    /*@PostMapping("register")
     public ResponseEntity<String> createUser(@Validated @RequestBody RegisterRequest registerRequest, BindingResult bindingResult) {
         if(!bindingResult.hasErrors()){
             userService.createUser(registerRequest);
@@ -30,6 +43,6 @@ public class UserController {
     @PostMapping("login")
     public ResponseEntity<?> logUser(@Validated @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         return userService.logUser(loginRequest);
-    }
+    }*/
 
 }

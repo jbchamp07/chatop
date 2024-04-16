@@ -7,7 +7,10 @@ import com.openclassrooms.chatop.model.User;
 import com.openclassrooms.chatop.repository.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -19,11 +22,44 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+
+    public AuthSuccess register(RegisterRequest request){
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setName(request.getName());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setCreated_at(Timestamp.from(Instant.now()));
+        user.setUpdated_at(Timestamp.from(Instant.now()));
+        userRepository.save(user);
+        String token = jwtService.generateToken(user);
+        return new AuthSuccess(token);
+    }
+    public AuthSuccess authenticate(LoginRequest request){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        User user = userRepository.findByEmail(request.getEmail());
+        String token = jwtService.generateToken(user);
+        return new AuthSuccess(token);
+    }
+
+
+
 
     public User getUserById(long id) {
         return  userRepository.findById(id).get();
     }
-
+/*
     public void createUser(RegisterRequest registerRequest) {
         User user = new User();
         user.setEmail(registerRequest.getEmail());
@@ -41,5 +77,6 @@ public class UserService {
         }else{
             return ResponseEntity.badRequest().body("Wrong email or password");
         }
-    }
+    }*/
+
 }

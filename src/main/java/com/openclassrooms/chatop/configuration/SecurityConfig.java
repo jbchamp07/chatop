@@ -4,10 +4,13 @@ import com.openclassrooms.chatop.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,59 +19,42 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Autowired
     private CustomUserDetailsService userDetailsService;
-
-
-    /*protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);
-    }*/
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        /*http.csrf((csrf -> csrf.disable()))
-                        .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/auth").permitAll()
-                .requestMatchers("/api/rentals").authenticated()
-                .requestMatchers("/api/messages").authenticated()
-                .anyRequest().authenticated())
-                .userDetailsService(userDetailsService);*/
-        return http.csrf((csrf -> csrf.disable())).authorizeHttpRequests((auth) -> auth.anyRequest().permitAll()).build();
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        req -> req.requestMatchers("/api/auth/register","/api/auth/login")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
+                ).userDetailsService(userDetailsService)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
-    /*@Bean
-    public UserDetailsService users() {
-        UserDetails user = User.builder().username("user").password(passwordEncoder().encode("password")).roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }*/
-
-
-    //Roles :
-    /*@Bean
-    public InMemoryUserDetailsManager userDetailsService(){
-        UserDetails user = User.builder()
-                .username("user")
-                .password("user")
-                .roles("USER")
-                .build();
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password("admin")
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user,admin);
-    }*/
 
 }
