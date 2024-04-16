@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,14 +44,16 @@ public class UserService {
         return new AuthSuccess(token);
     }
     public AuthSuccess authenticate(LoginRequest request){
-        authenticationManager.authenticate(
+        /*authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
-        );
+        );*/
         User user = userRepository.findByEmail(request.getEmail());
         String token = jwtService.generateToken(user);
+        //TODO Ici les modifications sont à tester
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
         return new AuthSuccess(token);
     }
 
@@ -58,6 +62,12 @@ public class UserService {
 
     public User getUserById(long id) {
         return  userRepository.findById(id).get();
+    }
+
+    public User getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return  userRepository.findByName(username);
     }
 /*
     public void createUser(RegisterRequest registerRequest) {

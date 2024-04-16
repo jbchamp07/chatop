@@ -3,6 +3,7 @@ package com.openclassrooms.chatop.controller;
 import com.openclassrooms.chatop.DTO.AuthSuccess;
 import com.openclassrooms.chatop.DTO.LoginRequest;
 import com.openclassrooms.chatop.DTO.RegisterRequest;
+import com.openclassrooms.chatop.model.User;
 import com.openclassrooms.chatop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,10 @@ public class UserController {
     @PostMapping("login")
     public ResponseEntity<AuthSuccess> login(@RequestBody LoginRequest user){
         return ResponseEntity.ok(userService.authenticate(user));
+    }
+    @GetMapping("me")
+    public ResponseEntity<User> login(){
+        return ResponseEntity.ok(userService.getUserInfo());
     }
 
 
