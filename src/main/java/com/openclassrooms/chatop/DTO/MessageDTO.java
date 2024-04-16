@@ -10,8 +10,6 @@ import java.sql.Timestamp;
 @Data
 public class MessageDTO {
 
-    @Id
-    private long id;
 
     private int rental_id;
 
