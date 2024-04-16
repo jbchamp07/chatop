@@ -36,7 +36,7 @@ public class UserService {
 
     public ResponseEntity<?> logUser(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getLogin());
-        if (user.getPassword() == loginRequest.getPassword()){
+        if (user.getPassword().equals(loginRequest.getPassword())){
             return ResponseEntity.ok(new AuthSuccess("tokenGenerated"));
         }else{
             return ResponseEntity.badRequest().body("Wrong email or password");
