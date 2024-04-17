@@ -44,15 +44,8 @@ public class UserService {
         return new AuthSuccess(token);
     }
     public AuthSuccess authenticate(LoginRequest request){
-        /*authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );*/
         User user = userRepository.findByEmail(request.getEmail());
         String token = jwtService.generateToken(user);
-        //TODO Ici les modifications sont à tester
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
         return new AuthSuccess(token);
     }

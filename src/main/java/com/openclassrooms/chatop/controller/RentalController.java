@@ -30,7 +30,6 @@ public class RentalController {
     public RentalResponse createRental(@RequestParam("name") String name,@RequestParam("surface") String surface,@RequestParam("price") String price,@RequestParam("description") String description,@RequestParam("picture") String picture){
         return rentalService.createRental(name,surface,price,description,picture);
     }
-    //TODO
     @PutMapping("/{id}")
     public RentalResponse updateRental(@PathVariable long id,@RequestParam("name") String name,@RequestParam("surface") String surface,@RequestParam("price") String price,@RequestParam("description") String description,@RequestParam("description") String picture){
         return rentalService.updateRental(id,name,surface,price,description,picture);
