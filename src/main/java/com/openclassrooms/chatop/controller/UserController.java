@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class UserController {
 
+    //TODO ajouter des tests de vérification de conformité des objets
+
     @Autowired
     private UserService userService;
 

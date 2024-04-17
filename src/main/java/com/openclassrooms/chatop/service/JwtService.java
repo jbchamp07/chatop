@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "798d97bad82ae937ef5af3529b7c2843f70473d40e068145631f7bd838044b55";
+    @Value("${Chatop.SECRET_KEY}")
+    private String SECRET_KEY;
 
     public String generateToken(User user){
         String token = Jwts.builder()
