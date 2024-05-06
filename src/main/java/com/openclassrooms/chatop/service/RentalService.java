@@ -79,9 +79,10 @@ public class RentalService {
     @Value("${server.port}")
     private String serverPort;
     private String addPicture(MultipartFile picture) throws IOException {
-        Path filePath = Paths.get(picturesPath + File.separator + picture.getOriginalFilename());
+        String temp = Timestamp.from(Instant.now()).toString().substring(5,7);
+        Path filePath = Paths.get(picturesPath + File.separator + temp + picture.getOriginalFilename());
         Files.copy(picture.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        return serverUrl + ":" + serverPort + "/api/rentals/image/" + picture.getOriginalFilename();
+        return serverUrl + ":" + serverPort + "/api/rentals/image/" + temp + picture.getOriginalFilename();
     }
 
     //Update a rental and return a message for confirmation
