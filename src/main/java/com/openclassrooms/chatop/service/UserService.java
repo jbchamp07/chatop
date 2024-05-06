@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +29,10 @@ public class UserService {
     private JwtService jwtService;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    /*@Autowired
+    private AuthenticationManager authenticationManager;*/
 
-
+    
     public AuthSuccess register(RegisterRequest request){
         User user = new User();
         user.setEmail(request.getEmail());
@@ -43,11 +44,16 @@ public class UserService {
         String token = jwtService.generateToken(user);
         return new AuthSuccess(token);
     }
-    public AuthSuccess authenticate(LoginRequest request){
+    public AuthSuccess authenticate(LoginRequest request) throws Exception {
         User user = userRepository.findByEmail(request.getEmail());
-        String token = jwtService.generateToken(user);
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
-        return new AuthSuccess(token);
+        //if(passwordEncoder.matches(user.getPassword(),passwordEncoder.encode(request.getPassword()))){
+        if(passwordEncoder.matches(request.getPassword(),user.getPassword())){
+            String token = jwtService.generateToken(user);
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
+            return new AuthSuccess(token);
+        }else{
+            throw new Exception("Email or password incorrect");
+        }
     }
 
 

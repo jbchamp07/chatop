@@ -10,7 +10,14 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -23,26 +30,37 @@ public class RentalService {
     @Autowired
     private UserService userService;
 
+    private String picturesPath = "src/main/resources/static/img";
+
+    //Return all rentals
     public RentalsResponse getRentals(){
         RentalsResponse rentalsResponse = new RentalsResponse();
         rentalsResponse.setRentals((List<Rental>) rentalRepository.findAll());
         return rentalsResponse;
     }
+    //Return a rental found by its id
     public Rental getRentalById(long id){
         return rentalRepository.findById(id).get();
     }
 
-    public RentalResponse createRental(String name, String surface, String price, String description, String picture) {
+    //Create a rental and return a message for confirmation
+    public RentalResponse createRental(String name, String surface, String price, String description, MultipartFile picture) {
         RentalResponse rentalResponse = new RentalResponse();
         Rental rental = new Rental();
         rental.setName(name);
         rental.setSurface(Double.parseDouble(surface));
         rental.setPrice(Double.parseDouble(price));
         rental.setDescription(description);
-        rental.setPicture(picture);
         rental.setCreated_at(Timestamp.from(Instant.now()));
         rental.setUpdated_at(Timestamp.from(Instant.now()));
         rental.setOwner(userService.getUserInfo());
+
+        try {
+            rental.setPicture(addPicture(picture));;
+        } catch (IOException e) {
+            rentalResponse.setMessage("Problem with picture : " + e.getMessage());
+            return rentalResponse;
+        }
 
         rentalRepository.save(rental);
         if(rentalRepository.findById(rental.getId()).get() != null)
@@ -52,6 +70,13 @@ public class RentalService {
         return rentalResponse;
     }
 
+    private String addPicture(MultipartFile picture) throws IOException {
+        Path filePath = Paths.get(picturesPath + File.separator + picture.getOriginalFilename());
+        Files.copy(picture.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filePath.toString();
+    }
+
+    //Update a rental and return a message for confirmation
     public RentalResponse updateRental(long id,String name, String surface, String price, String description, String picture) {
         RentalResponse rentalResponse = new RentalResponse();
         Rental rentalToUpdate = rentalRepository.findById(id).get();
