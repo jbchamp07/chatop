@@ -8,12 +8,16 @@ import com.openclassrooms.chatop.model.User;
 import com.openclassrooms.chatop.repository.RentalRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +26,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
-@Data
+
 @Service
 public class RentalService {
     @Autowired
@@ -70,13 +74,18 @@ public class RentalService {
         return rentalResponse;
     }
 
+    @Value("${server.url}")
+    private String serverUrl;
+    @Value("${server.port}")
+    private String serverPort;
     private String addPicture(MultipartFile picture) throws IOException {
         Path filePath = Paths.get(picturesPath + File.separator + picture.getOriginalFilename());
         Files.copy(picture.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        return filePath.toString();
+        return serverUrl + ":" + serverPort + "/api/rentals/image/" + picture.getOriginalFilename();
     }
 
     //Update a rental and return a message for confirmation
+    //TODO update image
     public RentalResponse updateRental(long id,String name, String surface, String price, String description, String picture) {
         RentalResponse rentalResponse = new RentalResponse();
         Rental rentalToUpdate = rentalRepository.findById(id).get();
@@ -96,5 +105,22 @@ public class RentalService {
             rentalResponse.setMessage("Rental not updated !");
         }
         return rentalResponse;
+    }
+
+    public byte[] getPictures(String imageUrl) {
+        // Charger l'image depuis les ressources
+        Resource resource = new ClassPathResource("static/img/" + imageUrl);
+
+        // Lire l'image en tant que flux d'octets
+        InputStream inputStream = null;
+        try {
+            inputStream = resource.getInputStream();
+            byte[] bytes = inputStream.readAllBytes();
+            // Fermer le flux d'entrée
+            inputStream.close();
+            return bytes;
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
