@@ -43,6 +43,7 @@ public class RentalController {
     public RentalResponse updateRental(@PathVariable long id,@RequestParam("name") String name,@RequestParam("surface") String surface,@RequestParam("price") String price,@RequestParam("description") String description,@RequestParam("description") String picture){
         return rentalService.updateRental(id,name,surface,price,description,picture);
     }
+    //TODO
     @GetMapping(value = "/image/{imageUrl}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@PathVariable String imageUrl){
         // Retourner les octets de l'image dans la réponse

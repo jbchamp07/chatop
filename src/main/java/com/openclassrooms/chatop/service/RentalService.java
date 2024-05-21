@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,8 @@ public class RentalService {
     }
     //Return a rental found by its id
     public Rental getRentalById(long id){
+        Rental rental = rentalRepository.findById(id).get();
+        rental.setPicture(getServerUrl() + "/" + rental.getPicture());
         return rentalRepository.findById(id).get();
     }
 
@@ -82,7 +85,9 @@ public class RentalService {
         String temp = Timestamp.from(Instant.now()).toString().substring(5,7);
         Path filePath = Paths.get(picturesPath + File.separator + temp + picture.getOriginalFilename());
         Files.copy(picture.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        return serverUrl + ":" + serverPort + "/api/rentals/image/" + temp + picture.getOriginalFilename();
+        //TODO
+        //return serverUrl + ":" + serverPort + "/api/rentals/image/" + temp + picture.getOriginalFilename();
+        return "api/rentals/image/" + temp + picture.getOriginalFilename();
     }
 
     //Update a rental and return a message for confirmation
@@ -123,5 +128,8 @@ public class RentalService {
         } catch (IOException e) {
             return null;
         }
+    }
+    private String getServerUrl() {
+        return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
     }
 }
