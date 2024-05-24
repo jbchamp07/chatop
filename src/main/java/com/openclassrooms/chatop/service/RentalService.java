@@ -40,13 +40,17 @@ public class RentalService {
     //Return all rentals
     public RentalsResponse getRentals(){
         RentalsResponse rentalsResponse = new RentalsResponse();
-        rentalsResponse.setRentals((List<Rental>) rentalRepository.findAll());
+        List<Rental> rentals = (List<Rental>) rentalRepository.findAll();
+        for (Rental rental: rentals) {
+            rental.setPicture(getServerUrl() + "/api/rentals/image/" + rental.getPicture());
+        }
+        rentalsResponse.setRentals(rentals);
         return rentalsResponse;
     }
     //Return a rental found by its id
     public Rental getRentalById(long id){
         Rental rental = rentalRepository.findById(id).get();
-        rental.setPicture(getServerUrl() + "/" + rental.getPicture());
+        rental.setPicture(getServerUrl() + "/api/rentals/image/" + rental.getPicture());
         return rentalRepository.findById(id).get();
     }
 
@@ -85,21 +89,26 @@ public class RentalService {
         String temp = Timestamp.from(Instant.now()).toString().substring(5,7);
         Path filePath = Paths.get(picturesPath + File.separator + temp + picture.getOriginalFilename());
         Files.copy(picture.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        //TODO
-        //return serverUrl + ":" + serverPort + "/api/rentals/image/" + temp + picture.getOriginalFilename();
-        return "api/rentals/image/" + temp + picture.getOriginalFilename();
+        return temp + picture.getOriginalFilename();
     }
 
     //Update a rental and return a message for confirmation
-    //TODO update image
-    public RentalResponse updateRental(long id,String name, String surface, String price, String description, String picture) {
+    public RentalResponse updateRental(long id,String name, String surface, String price, String description, MultipartFile picture) {
         RentalResponse rentalResponse = new RentalResponse();
         Rental rentalToUpdate = rentalRepository.findById(id).get();
         rentalToUpdate.setName(name);
         rentalToUpdate.setSurface(Double.parseDouble(surface));
         rentalToUpdate.setPrice(Double.parseDouble(price));
         rentalToUpdate.setDescription(description);
-        rentalToUpdate.setPicture(picture);
+
+
+        try {
+            rentalToUpdate.setPicture(addPicture(picture));;
+        } catch (IOException e) {
+            rentalResponse.setMessage("Problem with picture : " + e.getMessage());
+            return rentalResponse;
+        }
+
         rentalToUpdate.setUpdated_at(Timestamp.from(Instant.now()));
         rentalToUpdate.setOwner(userService.getUserInfo());
 
