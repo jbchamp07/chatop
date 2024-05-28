@@ -19,6 +19,7 @@ public class JwtService {
     @Value("${Chatop.SECRET_KEY}")
     private String SECRET_KEY;
 
+    //Generate token
     public String generateToken(User user){
         String token = Jwts.builder()
                 .subject(user.getName())
@@ -28,31 +29,37 @@ public class JwtService {
                 .compact();
         return token;
     }
-
+    //Extract claim from token
     public <T> T extractClaim(String token, Function<Claims,T> resolver){
         Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
+    //Extract username from token
     public String extractUserName(String token){
         return extractClaim(token,Claims::getSubject);
     }
+    //Verify the token validity with username and expiration
     public boolean isValid(String token, UserDetails user){
         String username = extractUserName(token);
         return (username.equals(user.getUsername())) && !isTokenExpired(token);
     }
 
+    //Verify the token expiration limit
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
+    //Extract expiration from token
     private Date extractExpiration(String token) {
         return extractClaim(token,Claims::getExpiration);
     }
 
+    //Convert base64 secret key to hmac key
     private SecretKey getSigninKey(){
         byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    //Extract claims from token
     private Claims extractAllClaims(String token){
         return Jwts.parser().verifyWith(getSigninKey()).build().parseSignedClaims(token).getPayload();
     }

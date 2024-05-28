@@ -29,10 +29,8 @@ public class UserService {
     private JwtService jwtService;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    /*@Autowired
-    private AuthenticationManager authenticationManager;*/
 
-    
+    //Register
     public AuthSuccess register(RegisterRequest request){
         User user = new User();
         user.setEmail(request.getEmail());
@@ -44,6 +42,7 @@ public class UserService {
         String token = jwtService.generateToken(user);
         return new AuthSuccess(token);
     }
+    //Authenticate
     public AuthSuccess authenticate(LoginRequest request) throws Exception {
         User user = userRepository.findByEmail(request.getEmail());
         //if(passwordEncoder.matches(user.getPassword(),passwordEncoder.encode(request.getPassword()))){
@@ -58,34 +57,17 @@ public class UserService {
 
 
 
-
+    //Get user by id
     public User getUserById(long id) {
         return  userRepository.findById(id).get();
     }
 
+    //Get user by authentication
     public User getUserInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return  userRepository.findByName(username);
     }
-/*
-    public void createUser(RegisterRequest registerRequest) {
-        User user = new User();
-        user.setEmail(registerRequest.getEmail());
-        user.setName(registerRequest.getName());
-        user.setPassword(registerRequest.getPassword());
-        user.setCreated_at(Timestamp.from(Instant.now()));
-        user.setUpdated_at(Timestamp.from(Instant.now()));
-        userRepository.save(user);
-    }
 
-    public ResponseEntity<?> logUser(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getLogin());
-        if (user.getPassword().equals(loginRequest.getPassword())){
-            return ResponseEntity.ok(new AuthSuccess("tokenGenerated"));
-        }else{
-            return ResponseEntity.badRequest().body("Wrong email or password");
-        }
-    }*/
 
 }

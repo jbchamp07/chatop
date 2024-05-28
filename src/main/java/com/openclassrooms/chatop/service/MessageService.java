@@ -21,6 +21,7 @@ public class MessageService {
     @Autowired
     private UserService userService;
 
+    //Create a message
     public MessageResponse createMessage(MessageRequest messageRequest) {
         MessageResponse messageResponse = new MessageResponse();
         Message message = new Message();

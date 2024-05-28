@@ -45,20 +45,4 @@ public class UserController {
 
 
 
-
-    /*@PostMapping("register")
-    public ResponseEntity<String> createUser(@Validated @RequestBody RegisterRequest registerRequest, BindingResult bindingResult) {
-        if(!bindingResult.hasErrors()){
-            userService.createUser(registerRequest);
-            return ResponseEntity.ok("user Created");
-        }else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error : " + bindingResult.getAllErrors());
-        }
-
-    }
-    @PostMapping("login")
-    public ResponseEntity<?> logUser(@Validated @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
-        return userService.logUser(loginRequest);
-    }*/
-
 }

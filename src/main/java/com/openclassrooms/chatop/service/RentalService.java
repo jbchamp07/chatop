@@ -36,7 +36,10 @@ public class RentalService {
     private UserService userService;
 
     private String picturesPath = "src/main/resources/static/img";
-
+    @Value("${server.url}")
+    private String serverUrl;
+    @Value("${server.port}")
+    private String serverPort;
     //Return all rentals
     public RentalsResponse getRentals(){
         RentalsResponse rentalsResponse = new RentalsResponse();
@@ -81,10 +84,7 @@ public class RentalService {
         return rentalResponse;
     }
 
-    @Value("${server.url}")
-    private String serverUrl;
-    @Value("${server.port}")
-    private String serverPort;
+    //Copy the picture and return the path
     private String addPicture(MultipartFile picture) throws IOException {
         String temp = Timestamp.from(Instant.now()).toString().substring(5,7);
         Path filePath = Paths.get(picturesPath + File.separator + temp + picture.getOriginalFilename());
@@ -121,7 +121,7 @@ public class RentalService {
         }
         return rentalResponse;
     }
-
+    //Get the picture with url
     public byte[] getPictures(String imageUrl) {
         // Charger l'image depuis les ressources
         Resource resource = new ClassPathResource("static/img/" + imageUrl);
@@ -138,6 +138,7 @@ public class RentalService {
             return null;
         }
     }
+    //Get the server and port
     private String getServerUrl() {
         return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
     }
